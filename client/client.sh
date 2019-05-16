@@ -26,7 +26,7 @@ do
         read index
 
         if [ $index -eq $index 2>/dev/null ] && ! [ -z "$index" ]; then
-                if (($index > 0)) && (($index < count)); then
+                if (($index >= 0)) && (($index <= count)); then
                         echo "Argument:"
                         read argument
                         echo ${commands[index]} $argument > $pipename
