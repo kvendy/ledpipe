@@ -1,0 +1,6 @@
+set-led-state|LED on/off, argument: on, off
+get-led-state|Get LED state, no arguments
+set-led-color|Set LED color, argument: red, green or blue
+get-led-color|Get LED color, no arguments
+set-led-rate|Set LED flashing rate, argument: integer 0..5
+get-led-rate|Get LED flashing rate, no arguments
