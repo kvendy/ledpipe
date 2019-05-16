@@ -11,5 +11,6 @@ public:
 	~Logic();
 
 	void run();
+	void createMethodsFile();
 };
 

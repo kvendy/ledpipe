@@ -1,16 +1,15 @@
 #pragma once
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include <string>
 #include <functional>
 
-
-class ISimpleReflection;
 using Method = std::function<std::string(std::string)>;
 
 class ISimpleReflection
 {
-	std::unordered_map<std::string, Method> methods;
+	std::map<std::string, Method> methods;
+	std::map<std::string, std::string> descriptions;
 public:
 	ISimpleReflection() {};
 	virtual ~ISimpleReflection() {};
@@ -26,10 +25,17 @@ public:
 		else
 			return it->second(parameters);
 	}
+
+	std::map<std::string, std::string> listMethods()
+	{
+		return descriptions;
+	}
+
 protected:
-	void addMethod(const std::string& name, Method method)
+	void addMethod(const std::string& name, const std::string& description, Method method)
 	{
 		methods[name] = method;
+		descriptions[name] = description;
 	}
 
 	virtual void reflect() = 0;

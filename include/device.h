@@ -48,12 +48,24 @@ public:
 protected:
 	virtual void reflect()
 	{
-		addMethod("set-led-state", std::bind(&Device::setState, this, std::placeholders::_1));
-		addMethod("set-led-rate",  std::bind(&Device::setRate,  this, std::placeholders::_1));
-		addMethod("set-led-color", std::bind(&Device::setColor, this, std::placeholders::_1));
-		addMethod("get-led-state", std::bind(&Device::getState, this, std::placeholders::_1));
-		addMethod("get-led-rate",  std::bind(&Device::getRate,  this, std::placeholders::_1));
-		addMethod("get-led-color", std::bind(&Device::getColor, this, std::placeholders::_1));
+		addMethod("set-led-state",
+				  "LED on/off, argument: on, off",
+				  std::bind(&Device::setState, this, std::placeholders::_1));
+		addMethod("set-led-rate",
+				  "Set LED flashing rate, argument: integer 0..5",
+				  std::bind(&Device::setRate,  this, std::placeholders::_1));
+		addMethod("set-led-color",
+				  "Set LED color, argument: red, green or blue ",
+				  std::bind(&Device::setColor, this, std::placeholders::_1));
+		addMethod("get-led-state",
+				  "Get LED state, no arguments",
+				  std::bind(&Device::getState, this, std::placeholders::_1));
+		addMethod("get-led-rate",
+				  "Get LED flashing rate, no arguments ",
+				  std::bind(&Device::getRate,  this, std::placeholders::_1));
+		addMethod("get-led-color",
+				  "Get LED color, no arguments",
+				  std::bind(&Device::getColor, this, std::placeholders::_1));
 	}
 };
 

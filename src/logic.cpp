@@ -4,6 +4,7 @@
 #include <iostream>
 
 extern const std::string FAILED;
+const std::string PARAMSFILENAME = "params.txt";
 
 void trim(std::string& line)
 {
@@ -54,5 +55,18 @@ void Logic::run()
 			result = FAILED;
 
 		pipe.write(result);
+	}
+}
+
+void Logic::createMethodsFile()
+{
+	std::ofstream outfile;
+	outfile.open(PARAMSFILENAME);
+
+	if (outfile.is_open())
+	{
+		std::map<std::string, std::string> descriptions = dev.listMethods();
+			for (auto it : descriptions)
+				outfile << it.first << "|" << it.second << std::endl;
 	}
 }
