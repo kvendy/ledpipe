@@ -2,48 +2,73 @@
 #include <iostream>
 #include <chrono>
 
-bool Device::setState(bool st)
+std::string Device::setState(std::string parameter)
 {
-	m_ledState = st;
-	m_command.store(Command::Update);
-	return true;
-}
+	bool newState;
 
-bool Device::setRate(int rt)
-{
-	if (rt < 0 || rt > 5)
-		return false;
+	if (parameter == "on")
+		newState = true;
+	else if (parameter == "off")
+		newState = false;
+	else
+		return FAILED;
 	
-	m_ledRate = rt;
+	m_ledState = newState;
 	m_command.store(Command::Update);
-	return true;
+	return OK + "\n";
 }
 
-bool Device::setColor(const std::string& cl)
+std::string Device::setRate(std::string parameter)
 {
-	if (cl != "red" &&
-		cl != "green" &&
-		cl != "blue")
-		return false;
+	int newRate = 0;
+	try
+	{
+		newRate = std::stoi(parameter);
+	}
+	catch (...)
+	{
+		return FAILED;
+	}
+
+	if (newRate < 0 || newRate > 5)
+		return FAILED;
 	
-	m_ledColor = cl;
+	m_ledRate = newRate;
 	m_command.store(Command::Update);
-	return true;
+	return OK + "\n";
 }
 
-bool Device::getState()
+std::string Device::setColor(std::string parameter)
 {
-	return m_ledState;
+	if (parameter != "red" &&
+		parameter != "green" &&
+		parameter != "blue")
+		return FAILED;
+	
+	m_ledColor = parameter;
+	m_command.store(Command::Update);
+	return OK + "\n";
 }
 
-int Device::getRate()
+std::string Device::getState(std::string parameter)
 {
-	return m_ledRate;
+	std::string result = OK + " ";
+	result += m_ledState ? ON : OFF;
+	return result + "\n";
 }
 
-std::string Device::getColor()
+std::string Device::getRate(std::string parameter)
 {
-	return m_ledColor;
+	std::string result = OK + " ";
+	result += std::to_string(m_ledRate);
+	return result + "\n";
+}
+
+std::string Device::getColor(std::string parameter)
+{
+	std::string result = OK + " ";
+	result += m_ledColor;
+	return result + "\n";
 }
 
 void Device::workingThread()
@@ -102,6 +127,7 @@ Device::Device() :
 	m_ledRate(1),
 	m_ledColor("red")
 {
+	reflect();
 }
 
 

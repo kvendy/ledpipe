@@ -11,6 +11,5 @@ public:
 	~Logic();
 
 	void run();
-	std::string call(const std::string& fn, const std::string& param);
 };
 

@@ -2,7 +2,14 @@
 #include <string>
 #include <future>
 
-class Device
+#include "isimplereflection.h"
+
+const std::string OK     = "OK";
+const std::string FAILED = "FAILED\n";
+const std::string ON     = "on";
+const std::string OFF    = "off";
+
+class Device : public ISimpleReflection
 {
 	enum Command
 	{
@@ -25,17 +32,28 @@ class Device
 
 public:
 	Device();
-	~Device();
+	virtual ~Device();
 
 	bool start();
 	bool stop();
 
-	bool setState(bool st);
-	bool setRate(int rt);
-	bool setColor(const std::string& cl);
+	std::string setState(std::string parameter);
+	std::string setRate (std::string parameter);
+	std::string setColor(std::string parameter);
 
-	bool        getState();
-	int         getRate();
-	std::string getColor();
+	std::string getState(std::string parameter);
+	std::string getRate (std::string parameter);
+	std::string getColor(std::string parameter);
+
+protected:
+	virtual void reflect()
+	{
+		addMethod("set-led-state", std::bind(&Device::setState, this, std::placeholders::_1));
+		addMethod("set-led-rate",  std::bind(&Device::setRate,  this, std::placeholders::_1));
+		addMethod("set-led-color", std::bind(&Device::setColor, this, std::placeholders::_1));
+		addMethod("get-led-state", std::bind(&Device::getState, this, std::placeholders::_1));
+		addMethod("get-led-rate",  std::bind(&Device::getRate,  this, std::placeholders::_1));
+		addMethod("get-led-color", std::bind(&Device::getColor, this, std::placeholders::_1));
+	}
 };
 
