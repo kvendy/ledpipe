@@ -2,6 +2,91 @@
 #include <iostream>
 #include <chrono>
 
+#ifdef __unix__
+
+const int RED   = 31;
+const int GREEN = 32;
+const int BLUE  = 34;
+
+//\e[1G - move cursor to the 1st column
+//\033[...m set text properties
+//\033[0m - default
+
+void setConColor(int ForgC)
+{
+	std::cout << "\033[" << ForgC << "m";
+}
+
+void gotoColumn(int x)
+{
+	std::cout << "\e[" << x <<"G";
+}
+
+void saveConAttr()
+{
+}
+
+void clearConAttr()
+{
+	setConColor(0);
+}
+
+#elif defined _WIN32
+
+#include <Windows.h>
+
+const int RED   = 12;
+const int GREEN = 10;
+const int BLUE  = 9;
+
+HANDLE hStdOut = INVALID_HANDLE_VALUE;
+CONSOLE_SCREEN_BUFFER_INFO old_csbi;
+
+void setConColor(int ForgC)
+{
+	if (hStdOut == INVALID_HANDLE_VALUE)
+		return;
+	
+	WORD wColor;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	if (GetConsoleScreenBufferInfo(hStdOut, &csbi))
+	{
+		//Mask out all but the background attribute, and add in the forgournd color
+		wColor = (csbi.wAttributes & 0xF0) + (ForgC & 0x0F);
+		SetConsoleTextAttribute(hStdOut, wColor);
+	}
+}
+
+void gotoColumn(int x)
+{
+	if (hStdOut == INVALID_HANDLE_VALUE)
+		return;
+
+	COORD coord;
+	coord.X = x;
+	coord.Y = old_csbi.dwCursorPosition.Y; //stay at the same line
+	SetConsoleCursorPosition(hStdOut, coord);
+}
+
+void saveConAttr()
+{
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(hStdOut, &old_csbi);
+}
+
+void clearConAttr()
+{
+	if (hStdOut == INVALID_HANDLE_VALUE)
+		return;
+	
+	WORD wColor = old_csbi.wAttributes;
+	SetConsoleTextAttribute(hStdOut, wColor);
+}
+
+#endif // _WIN32
+
+
 bool Device::setState(bool st)
 {
 	m_ledState = st;
@@ -48,9 +133,9 @@ std::string Device::getColor()
 
 void Device::workingThread()
 {
-	bool        l_ledState;
-	int         l_ledRate;
-	std::string l_ledColor;
+	bool        l_ledState = false;
+	int         l_ledRate  = 1;
+	std::string l_ledColor = "red";
 
 	for (;;)
 	{
@@ -59,7 +144,7 @@ void Device::workingThread()
 		case None:
 			break;
 		case Stop:
-			std::cout << "\e[1G" << std::flush;
+			gotoColumn(0);
 			return;
 		case Update:
 			m_mutexSettings.lock();
@@ -71,25 +156,25 @@ void Device::workingThread()
 			break;
 		}
 
-		int colorCode = 30;
+		int colorCode = 0;
 		if (l_ledColor == "red")
-			colorCode = 31;
+			colorCode = RED;
 		else if (l_ledColor == "green")
-			colorCode = 32;
+			colorCode = GREEN;
 		else if (l_ledColor == "blue")
-			colorCode = 34;
+			colorCode = BLUE;
 
 		int ms = 1000 / 2 / l_ledRate;
 
 		if (l_ledState)
 		{
-			//\e[1G - move cursor to the 1st column
-			//\033[...m set text properties
-			//\033[0m - default
-			
-			std::cout << "\e[1G\033[" << colorCode << "m\b0\033[0m" << std::flush;
+			gotoColumn(0);
+			setConColor(colorCode);
+			std::cout << "0" << std::flush;
+			clearConAttr();
 			std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-			std::cout << "\e[1G " << std::flush;
+			gotoColumn(0);
+			std::cout << " " << std::flush;
 			std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 		}
 		else
@@ -102,6 +187,7 @@ Device::Device() :
 	m_ledRate(1),
 	m_ledColor("red")
 {
+	saveConAttr();
 }
 
 

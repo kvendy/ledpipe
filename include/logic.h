@@ -1,5 +1,10 @@
 #pragma once
+#ifdef __unix__
 #include "pipe_unix.h"
+#elif defined _WIN32
+#include "pipe_windows.h"
+#endif
+
 #include "device.h"
 
 class Logic

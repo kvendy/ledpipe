@@ -1,4 +1,7 @@
-#include "pipe_unix.h"
+#include "pipe_windows.h"
+#include <iostream>
+
+#define BUFSIZE 512
 
 Pipe::Pipe(const std::string& name) :
 	pipeName(name),
@@ -29,14 +32,19 @@ Pipe::Pipe(const std::string& name) :
 		std::cout << "Pipe created" << std::endl;
 }
 
+Pipe::~Pipe()
+{
+	::CloseHandle(hPipe);
+}
+
 std::string Pipe::read()
 {
 	char data[BUFSIZE];
 	DWORD numRead;
 
-	ConnectNamedPipe(hPipe, NULL);
-	ReadFile(hPipe, data, BUFSIZE, &numRead, NULL);
-	DisconnectNamedPipe(hPipe);
+	::ConnectNamedPipe(hPipe, NULL);
+	::ReadFile(hPipe, data, BUFSIZE, &numRead, NULL);
+	::DisconnectNamedPipe(hPipe);
 
 	std::string content(data, 0, numRead);
 
@@ -45,11 +53,11 @@ std::string Pipe::read()
 
 void Pipe::write(const std::string& data)
 {
-	ConnectNamedPipe(hPipe, NULL);
+	::ConnectNamedPipe(hPipe, NULL);
 	std::wstring stemp = std::wstring(data.begin(), data.end());
 	LPCWSTR wData = stemp.c_str();
 	DWORD numBytesWritten = 0,
-	result = WriteFile(
+	result = ::WriteFile(
 	         hPipe,                           // handle to our outbound pipe
 	         wData,                           // data to send
 	         wcslen(wData) * sizeof(wchar_t), // length of data to send (bytes)

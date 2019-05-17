@@ -8,7 +8,6 @@ const std::string FAILED = "FAILED";
 
 void trim(std::string& line)
 {
-
 	auto val = line.find_last_not_of(" \n\r\t") + 1;
 
 	if (val == line.size() || val == std::string::npos) {
@@ -23,7 +22,6 @@ Logic::Logic(const std::string& pipeName) :
 	pipe(pipeName)
 {
 }
-
 
 Logic::~Logic()
 {
