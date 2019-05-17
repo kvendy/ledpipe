@@ -9,6 +9,8 @@ commands=()
 [ ! -f $PIPEFILE ] && { echo "$PIPEFILE file not found"; exit 99; }
 pipename=$(head -n 1 $PIPEFILE)
 
+[ ! -e $pipename ] && { echo "$pipename pipe not found"; exit 99; }
+
 echo "Availible commands:"
 
 [ ! -f $COMMANDSFILE ] && { echo "$COMMANDSFILE file not found"; exit 99; }
